@@ -1,9 +1,11 @@
 import cv2
 import threading
 import notifacation
+import util
+import json
 
 showImages = True
-
+settings = util.getSettings()
 cap = cv2.VideoCapture(0)
 backSub = cv2.createBackgroundSubtractorKNN()
 activeState = False

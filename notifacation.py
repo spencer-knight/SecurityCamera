@@ -1,8 +1,8 @@
 import smtplib, ssl
 import json
+import util
 
-settingsFile = open("settings.json", "r")
-settings = json.loads( settingsFile.read())
+settings = util.getSettings()
 notifacationGroup = settings["alertGroup"]
 
 def alertEmail(receiver_email, message = "\nMotion detected!"):
