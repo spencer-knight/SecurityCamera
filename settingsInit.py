@@ -4,20 +4,7 @@ import util
 settingsFileJson = util.getSettings()
 #Can't figure out how to get list input to actually translate
 
-
-settingsJson = """{
-    "emailAddress" : "",
-    "emailPassword" : "", 
-    "alertEnabled" : false,
-    "videoOut" : "./Recordings/",
-
-    
-    "alertGroup" : [
-        "",
-        ""
-    ]
-}"""
-settingsJson = json.loads(settingsJson)
+settingsJson = json.loads("{}")
 settingList = [
     "emailAddress",
     "emailPassword",
@@ -25,6 +12,10 @@ settingList = [
     "videoOut",
     "testVariable"
 ]
+settingsListList[
+    "alertGroup"
+]
+#need to implement way of making this list get taken as input
 
 
 for item in settingList:
