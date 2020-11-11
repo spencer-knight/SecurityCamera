@@ -1,0 +1,11 @@
+{
+    "alertEnabled": false,
+    "videoOut": "./Recordings/",
+    "fileNameFormat": "%d-%m-%Y_%H%M",
+    "showImages": "false",
+    "alertMessage": "Motion Detected",
+    "recordingTime": 10.0,
+    "startDelay": 5.0,
+    "outfileFramerate": 5.0,
+    "alertGroup": []
+}
