@@ -53,7 +53,7 @@ def resetTimer():
     if not timer == None:
         if timer.is_alive():
             timer.cancel()
-            print("Timer reset")
+            #print("Timer reset")
 
 def motionDetected():
     global active

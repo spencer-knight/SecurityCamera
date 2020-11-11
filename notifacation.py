@@ -17,7 +17,7 @@ def alertEmail(receiver_email, message = "\nMotion detected!"):
         server.sendmail(sender_email, receiver_email, message)
 
 def alertGroup( message = "\n Motion detected!"):
-    if True:
+    if settings["alertEnabled"]:
         for x in notifacationGroup:
             alertEmail( x, message)
         print("Finished alerting")
