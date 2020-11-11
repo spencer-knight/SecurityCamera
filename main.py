@@ -2,6 +2,7 @@ import cv2
 import threading
 import notifacation
 import util
+import datetime
 import json
 
 showImages = True
@@ -16,6 +17,7 @@ timer = None
 startDelay = 5.0
 startDelayTimer = None
 notifacationThread = None
+out = cv2.VideoWriter(settings["videoOut"] + "wackyerror.mp4",cv2.VideoWriter_fourcc('M','P','4','V'), 15.0, (640,480))
 
 def onTimer():
     global active
@@ -59,6 +61,7 @@ def motionDetected():
     global active
     global timer
     
+    # This only gets run initially on motion
     if not active and armed:
         print("Motion detected!")
         #alertGroup needs to be threaded so that it doesn't lag the program
@@ -69,6 +72,7 @@ def motionDetected():
         resetTimer()
         setTimer()
         timer.start()
+        out = cv2.VideoWriter(settings["videoOut"] + "RecordingName.mp4",cv2.VideoWriter_fourcc('M','P','4','V'), 15.0, (640,480))
         #start timer
         #notify user(make new func for multiple receivers)
         #initialize global VideoWriter variable
@@ -94,8 +98,10 @@ def main():
             cv2.imshow("Frame", frame)
             cv2.imshow("Motion", motionFrame)
 
-        #if active:
+        if active:
             #output to video file
+            #out = cv2.VideoWriter(settings["videoOut"] + "RecordingName.mp4",cv2.VideoWriter_fourcc('M','P','G','4'), 15.0, (640,480))
+            out.write(frame)
             #print("I should write here")
 
         #exit when user presses q
