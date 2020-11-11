@@ -71,7 +71,7 @@ def motionDetected():
         print("Motion detected!")
 
         #alertGroup needs to be threaded so that it doesn't stop the camera
-        notifacationThread = threading.Thread( target = notifacation.alertGroup, args = ("Motion detected laptop", ))
+        notifacationThread = threading.Thread( target = notifacation.alertGroup, args = (settings["alertMessage"], ))
         notifacationThread.start()
         active = True
         resetTimer()
@@ -80,7 +80,7 @@ def motionDetected():
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime(settings["fileNameFormat"])
         #might add check to see if file already exists, then add something so that stuff doesn't get overwritten
-        out = cv2.VideoWriter(settings["videoOut"] + recName + ".mp4",cv2.VideoWriter_fourcc(*"mp4v"), 15.0, (640,480))
+        out = cv2.VideoWriter(settings["videoOut"] + recName + ".mp4",cv2.VideoWriter_fourcc(*"mp4v"), settings["outfileFramerate"], (640,480))
     else: 
         if active and armed:
             resetTimer()
