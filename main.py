@@ -7,16 +7,18 @@ import json
 
 from util import getSettings
 
-showImages = True
+
 settings = util.getSettings()
+startDelay = settings["startDelay"]
+recordingTime = settings["recordingTime"]
+showImages = settings["showImages"]
+
 cap = cv2.VideoCapture(0)
 backSub = cv2.createBackgroundSubtractorKNN()
 activeState = False
 active = False
 armed = False
-recordingTime = settings["recordingTime"]
 timer = None
-startDelay = settings["startDelay"]
 startDelayTimer = None
 notifacationThread = None
 out = None 
