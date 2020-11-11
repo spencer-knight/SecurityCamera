@@ -10,7 +10,8 @@ settingList = [
     "emailPassword",
     "alertEnabled",
     "videoOut",
-    "testVariable"
+    "fileNameFormat",
+
 ]
 settingsListList[
     "alertGroup"

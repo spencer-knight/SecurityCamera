@@ -17,13 +17,14 @@ timer = None
 startDelay = 5.0
 startDelayTimer = None
 notifacationThread = None
-out = cv2.VideoWriter(settings["videoOut"] + "wackyerror.mp4",cv2.VideoWriter_fourcc('M','P','4','V'), 15.0, (640,480))
+out = None 
 
+# Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
     global active
     active = False
     print("Stop doing")
-    #release writer
+    out.release()
 
 def setTimer():
     global timer
@@ -55,27 +56,27 @@ def resetTimer():
     if not timer == None:
         if timer.is_alive():
             timer.cancel()
-            #print("Timer reset")
 
 def motionDetected():
     global active
     global timer
+    global out
     
     # This only gets run initially on motion
     if not active and armed:
         print("Motion detected!")
-        #alertGroup needs to be threaded so that it doesn't lag the program
+
+        #alertGroup needs to be threaded so that it doesn't stop the camera
         notifacationThread = threading.Thread( target = notifacation.alertGroup, args = ("Motion detected laptop", ))
-        #notifacation.alertGroup("Motion detected test")
         notifacationThread.start()
         active = True
         resetTimer()
         setTimer()
         timer.start()
-        out = cv2.VideoWriter(settings["videoOut"] + "RecordingName.mp4",cv2.VideoWriter_fourcc('M','P','4','V'), 15.0, (640,480))
-        #start timer
-        #notify user(make new func for multiple receivers)
-        #initialize global VideoWriter variable
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime(settings["fileNameFormat"])
+        #might add check to see if file already exists, then add something so that stuff doesn't get overwritten
+        out = cv2.VideoWriter(settings["videoOut"] + recName + ".mp4",cv2.VideoWriter_fourcc(*"mp4v"), 15.0, (640,480))
     else: 
         if active and armed:
             resetTimer()
@@ -87,7 +88,6 @@ def main():
         ret, frame = cap.read()
         motionFrame = getMotion( frame)
         motionDetectedBool = percentWhite( frame, motionFrame) > 4.0
-        # Show images
     
         if motionDetectedBool:
             motionDetected()
@@ -99,10 +99,7 @@ def main():
             cv2.imshow("Motion", motionFrame)
 
         if active:
-            #output to video file
-            #out = cv2.VideoWriter(settings["videoOut"] + "RecordingName.mp4",cv2.VideoWriter_fourcc('M','P','G','4'), 15.0, (640,480))
             out.write(frame)
-            #print("I should write here")
 
         #exit when user presses q
         if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -113,10 +110,6 @@ def main():
                     timer.cancel()
             break     
 
-# Initialize background photo so that it doesn't start automatically saying motion is detected
-#ret, frame = cap.read()
-#for i in range(5):
-#    backSub.apply( frame)
 setStartDelayTimer()
 startDelayTimer.start()
 main()
