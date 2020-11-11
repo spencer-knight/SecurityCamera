@@ -11,11 +11,13 @@ settingsList = [
     "alertEnabled",
     "videoOut",
     "fileNameFormat",
-    "showImages"
+    "showImages",
+    "alertMessage"
 ]
 settingsNumberList = [
     "recordingTime",
-    "startDelay"
+    "startDelay",
+    "outfileFramerate"
 ]
 settingsListList = [
     "alertGroup"
@@ -42,6 +44,10 @@ for item in settingsNumberList:
     else:
         userIn = input(item + ": ")
         settingsJson[item] = float(userIn)
+
+for item in settingsListList:
+    if item in settingsFileJson:
+        settingsJson[item] = settingsFileJson[item]
 
 with open("settings.json", "w") as out:
     json.dump(settingsJson, out, indent=4)
