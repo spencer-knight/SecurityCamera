@@ -5,6 +5,8 @@ import util
 import datetime
 import json
 
+from util import getSettings
+
 showImages = True
 settings = util.getSettings()
 cap = cv2.VideoCapture(0)
@@ -12,9 +14,9 @@ backSub = cv2.createBackgroundSubtractorKNN()
 activeState = False
 active = False
 armed = False
-recordingTime = 10.0
+recordingTime = settings["recordingTime"]
 timer = None
-startDelay = 5.0
+startDelay = settings["startDelay"]
 startDelayTimer = None
 notifacationThread = None
 out = None 
