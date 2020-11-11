@@ -11,7 +11,7 @@ settingsList = [
     "alertEnabled",
     "videoOut",
     "fileNameFormat",
-
+    "showImages"
 ]
 settingsNumberList = [
     "recordingTime",
