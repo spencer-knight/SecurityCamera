@@ -5,9 +5,10 @@ import util
 import datetime
 import json
 from flask import Flask, render_template, Response
-import numpy as np
+import time
+import os
+import psutil
 
-from util import getSettings
 
 
 settings = util.getSettings()
@@ -25,6 +26,7 @@ startDelayTimer = None
 notifacationThread = None
 out = None 
 frame = None
+flaskThread = None
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
@@ -109,6 +111,8 @@ def main():
 
         if active:
             out.write(frame)
+        os.system(settings["clearCommand"])
+        print("cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent))
 
         #exit when user presses q
         if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -121,6 +125,7 @@ def main():
                 if timer.is_alive():
                     timer.cancel()
             break     
+        time.sleep(settings["loopDelay"])
 
 app=Flask(__name__)
 
@@ -139,13 +144,15 @@ def startApp():
 
 def gen_frames():
     while(True):
-        ret, buffer = cv2.imencode('.jpg', np.float32(frame))
+        ret, buffer = cv2.imencode('.jpg', frame)
         out = buffer.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
+        time.sleep(settings["loopDelay"])
 
 setStartDelayTimer()
 startDelayTimer.start()
-flaskThread = threading.Thread(target = startApp)
-flaskThread.start()
+if settings["websiteOn"]:
+    flaskThread = threading.Thread(target = startApp)
+    flaskThread.start()
 main()
