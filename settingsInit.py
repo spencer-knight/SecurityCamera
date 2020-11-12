@@ -14,7 +14,8 @@ settingsList = [
     "showImages",
     "alertMessage",
     "websiteOn",
-    "clearCommand"
+    "clearCommand",
+    "please"
 ]
 settingsNumberList = [
     "recordingTime",
