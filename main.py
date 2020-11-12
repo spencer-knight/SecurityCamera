@@ -94,6 +94,7 @@ def motionDetected():
 
 def main():
     global frame
+    global motionFrame
 
     while 1:
         ret, frame = cap.read()
@@ -110,9 +111,12 @@ def main():
             cv2.imshow("Motion", motionFrame)
 
         if active:
+            timeInfo = datetime.datetime.now()
+            recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+            frame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
             out.write(frame)
-        os.system(settings["clearCommand"])
-        print("cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent))
+        #os.system(settings["clearCommand"])
+        #print("cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent))
 
         #exit when user presses q
         if cv2.waitKey(25) & 0xFF == ord('q'):
@@ -139,17 +143,49 @@ def video_feed():
     return Response(gen_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/motion_view')
+def motion_view():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen_frames_motion(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 def startApp():
     app.run(host='0.0.0.0')
 
 def gen_frames():
+    global frame
     while(True):
+
+        #timeInfo = datetime.datetime.now()
+        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        frame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+
         ret, buffer = cv2.imencode('.jpg', frame)
         out = buffer.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
         time.sleep(settings["loopDelay"])
 
+def gen_frames_motion():
+    global motionFrame
+    while(True):
+
+        #timeInfo = datetime.datetime.now()
+        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        motionFrame = cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+
+        ret, buffer = cv2.imencode('.jpg', motionFrame)
+        out = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
+        time.sleep(settings["loopDelay"])
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
