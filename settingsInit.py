@@ -12,12 +12,16 @@ settingsList = [
     "videoOut",
     "fileNameFormat",
     "showImages",
-    "alertMessage"
+    "alertMessage",
+    "websiteOn",
+    "clearCommand",
+    "please"
 ]
 settingsNumberList = [
     "recordingTime",
     "startDelay",
-    "outfileFramerate"
+    "outfileFramerate",
+    "loopDelay"
 ]
 settingsListList = [
     "alertGroup"
