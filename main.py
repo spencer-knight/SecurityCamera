@@ -4,6 +4,8 @@ import notifacation
 import util
 import datetime
 import json
+from flask import Flask, render_template, Response
+import numpy as np
 
 from util import getSettings
 
@@ -22,6 +24,7 @@ timer = None
 startDelayTimer = None
 notifacationThread = None
 out = None 
+frame = None
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
@@ -88,6 +91,8 @@ def motionDetected():
             timer.start()
 
 def main():
+    global frame
+
     while 1:
         ret, frame = cap.read()
         motionFrame = getMotion( frame)
@@ -109,11 +114,38 @@ def main():
         if cv2.waitKey(25) & 0xFF == ord('q'):
             cap.release()
             cv2.destroyAllWindows()
+            if not out == None:
+                out.release()
+            flaskThread.join()
             if not timer == None:
                 if timer.is_alive():
                     timer.cancel()
             break     
 
+app=Flask(__name__)
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/video_feed')
+def video_feed():
+    """Video streaming route. Put this in the src attribute of an img tag."""
+    return Response(gen_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+def startApp():
+    app.run(host='0.0.0.0')
+
+def gen_frames():
+    while(True):
+        ret, buffer = cv2.imencode('.jpg', np.float32(frame))
+        out = buffer.tobytes()
+        yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
+
 setStartDelayTimer()
 startDelayTimer.start()
+flaskThread = threading.Thread(target = startApp)
+flaskThread.start()
 main()
