@@ -85,7 +85,7 @@ def motionDetected():
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime(settings["fileNameFormat"])
         #might add check to see if file already exists, then add something so that stuff doesn't get overwritten
-        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#out = cv2.VideoWriter(settings["videoOut"] + recName + ".mp4",cv2.VideoWriter_fourcc(*"mp4v"), settings["outfileFramerate"], (640,480))
+        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#
     else: 
         if active and armed:
             resetTimer()
@@ -112,15 +112,15 @@ def main():
 
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        frame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        cv2.putText( frame, get_performance(), (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( outFrame, get_performance(), (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         if showImages:
-            cv2.imshow("Frame", frame)
+            cv2.imshow("Frame", outFrame)
             cv2.imshow("Motion", motionFrame)
 
         if active:
-            out.write(frame)
+            out.write(outFrame)
         #os.system(settings["clearCommand"])
         #print("cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent))
 
@@ -209,9 +209,10 @@ def gen_frames():
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        frame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        #timeInfo = datetime.datetime.now()
+        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        #outFrame = cv2.putText( outFrame, get_performance(), (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         ret, buffer = cv2.imencode('.jpg', frame)
         out = buffer.tobytes()
