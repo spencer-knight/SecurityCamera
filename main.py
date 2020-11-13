@@ -28,6 +28,7 @@ out = None
 frame = None
 flaskThread = None
 displayString = None
+timeString = None
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
@@ -35,7 +36,8 @@ def onTimer():
     global out
     active = False
     print("Stop doing")
-    out.release()
+    #out.release() For some reason releaseing the object causes a segmentation fault.
+    out = None
 
 def setTimer():
     global timer
@@ -102,6 +104,7 @@ def main():
     global motionFrame
     global displayString
     global active
+    global timeString
 
     while 1:
         displayString = get_performance()
@@ -119,8 +122,14 @@ def main():
 
 
         timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        timeString = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        recName = timeString
+        outFrame = frame
+        timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         if showImages:
@@ -145,7 +154,7 @@ def main():
             break     
         time.sleep(settings["loopDelay"])
 
-app=Flask(__name__,static_folder='Recordings')
+app=Flask(__name__,static_folder='')
 
 @app.route('/')
 def home():
@@ -178,7 +187,7 @@ def return_videos():
     """
     for filename in reversed(os.listdir("./Recordings/")):
         if filename.endswith(".mp4") or filename.endswith(".webm"):
-            ret = ret + video_str.format(filename = filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
+            ret = ret + video_str.format(filename = settings["videoOut"] + filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
 
     ret += """
     </html>
@@ -212,6 +221,7 @@ def startApp():
 def gen_frames():
     global frame
     global displayString
+    global timeString
 
     while(True):
 
@@ -220,8 +230,13 @@ def gen_frames():
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        recName = timeString
+        outFrame = frame
+        timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         ret, buffer = cv2.imencode('.jpg', outFrame)
@@ -232,18 +247,25 @@ def gen_frames():
 
 def gen_frames_motion():
     global motionFrame
+    global timeString
+    global displayString
     while(True):
 
         #timeInfo = datetime.datetime.now()
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        #timeInfo = datetime.datetime.now()
-        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        #motionFrame = cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        #outFrame = cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        timeInfo = datetime.datetime.now()
+        recName = timeString
+        outFrame = motionFrame
+        timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
+        outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        ret, buffer = cv2.imencode('.jpg', cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1))
+        ret, buffer = cv2.imencode('.jpg', outFrame)
         out = buffer.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
