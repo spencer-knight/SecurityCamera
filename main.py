@@ -27,11 +27,12 @@ notifacationThread = None
 out = None 
 frame = None
 flaskThread = None
-performanceString = None
+displayString = None
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
     global active
+    global out
     active = False
     print("Stop doing")
     out.release()
@@ -99,10 +100,14 @@ def get_performance():
 def main():
     global frame
     global motionFrame
-    global performanceString
+    global displayString
+    global active
 
     while 1:
-        performanceString = get_performance()
+        displayString = get_performance()
+        if active:
+            displayString += " active" 
+        
         ret, frame = cap.read()
         #frame = cv2.resize( frame, (640,480))
         motionFrame = getMotion( frame)
@@ -116,7 +121,7 @@ def main():
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        outFrame = cv2.putText( outFrame, performanceString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         if showImages:
             cv2.imshow("Frame", outFrame)
@@ -206,7 +211,7 @@ def startApp():
 
 def gen_frames():
     global frame
-    global performanceString
+    global displayString
 
     while(True):
 
@@ -217,7 +222,7 @@ def gen_frames():
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        outFrame = cv2.putText( outFrame, performanceString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         ret, buffer = cv2.imencode('.jpg', outFrame)
         out = buffer.tobytes()
