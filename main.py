@@ -27,6 +27,7 @@ notifacationThread = None
 out = None 
 frame = None
 flaskThread = None
+performanceString = None
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
@@ -98,8 +99,10 @@ def get_performance():
 def main():
     global frame
     global motionFrame
+    global performanceString
 
     while 1:
+        performanceString = get_performance()
         ret, frame = cap.read()
         #frame = cv2.resize( frame, (640,480))
         motionFrame = getMotion( frame)
@@ -113,7 +116,7 @@ def main():
         timeInfo = datetime.datetime.now()
         recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        outFrame = cv2.putText( outFrame, get_performance(), (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( outFrame, performanceString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
         if showImages:
             cv2.imshow("Frame", outFrame)
@@ -203,18 +206,20 @@ def startApp():
 
 def gen_frames():
     global frame
+    global performanceString
+
     while(True):
 
         #timeInfo = datetime.datetime.now()
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        #timeInfo = datetime.datetime.now()
-        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        #outFrame = cv2.putText( outFrame, get_performance(), (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        outFrame = cv2.putText( outFrame, performanceString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        ret, buffer = cv2.imencode('.jpg', frame)
+        ret, buffer = cv2.imencode('.jpg', outFrame)
         out = buffer.tobytes()
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
@@ -228,8 +233,8 @@ def gen_frames_motion():
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        #timeInfo = datetime.datetime.now()
+        #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #motionFrame = cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
         #outFrame = cv2.putText( motionFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
