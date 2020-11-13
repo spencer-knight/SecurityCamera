@@ -154,7 +154,7 @@ def main():
             break     
         time.sleep(settings["loopDelay"])
 
-app=Flask(__name__,static_folder='')
+app=Flask(__name__,static_folder=settings["videoOut"][:-1])
 
 @app.route('/')
 def home():
@@ -187,7 +187,7 @@ def return_videos():
     """
     for filename in reversed(os.listdir("./Recordings/")):
         if filename.endswith(".mp4") or filename.endswith(".webm"):
-            ret = ret + video_str.format(filename = settings["videoOut"] + filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
+            ret = ret + video_str.format(filename = filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
 
     ret += """
     </html>
@@ -195,26 +195,6 @@ def return_videos():
     """
     return render_template_string(ret)
 
-@app.route("/test")
-def test():
-    ret = """
-    <!DOCTYPE html>
-    <html>
-    <body>
-    """
-
-    video_str = """
-    <video height="480" width="640" controls>
-        <source src=\"{lbrace}{lbrace} url_for('static', filename='{filename}') {rbrace}{rbrace}\" type=\"video/mp4\">
-    </video>
-    <br>
-    """
-    ret += video_str
-    ret += """
-    </html>
-    </body>
-    """
-    return render_template_string( ret.format(filename = "rick.mp4", lbrace = "{", rbrace = "}"))
 def startApp():
     app.run(host='0.0.0.0')
 
