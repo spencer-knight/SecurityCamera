@@ -1,15 +1,31 @@
-import cv2
 import threading
-import notifacation
-import util
 import datetime
 import json
-from flask import Flask, render_template, render_template_string, Response
 import time
 import os
-import psutil
 
+import init
+init.run()
+import notifacation
+import util
 
+try:
+    from flask import Flask, render_template, render_template_string, Response
+except:
+    util.install("flask")
+    from flask import Flask, render_template, render_template_string, Response
+
+try:
+    import psutil
+except:    
+    util.install("psutil")
+    import psutil
+
+try:
+    import cv2
+except:
+    util.install("opencv-contrib-python")
+    import cv2
 
 settings = util.getSettings()
 startDelay = settings["startDelay"]
@@ -185,7 +201,7 @@ def return_videos():
     </video>
     <br>
     """
-    for filename in reversed(os.listdir("./Recordings/")):
+    for filename in reversed(os.listdir(settings["videoOut"])):
         if filename.endswith(".mp4") or filename.endswith(".webm"):
             ret = ret + video_str.format(filename = filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
 
@@ -250,6 +266,7 @@ def gen_frames_motion():
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
         time.sleep(settings["loopDelay"])
+
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
