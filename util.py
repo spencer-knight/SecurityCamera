@@ -1,4 +1,5 @@
 import json
+import pip._internal as pip
 
 def getSettings():
 
