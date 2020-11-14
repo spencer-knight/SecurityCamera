@@ -13,19 +13,19 @@ import util
 try:
     from flask import Flask, render_template, render_template_string, Response
 except:
-    install("flask")
+    util.install("flask")
     from flask import Flask, render_template, render_template_string, Response
 
 try:
     import psutil
 except:    
-    install("psutil")
+    util.install("psutil")
     import psutil
 
 try:
     import cv2
 except:
-    install("opencv-contrib-python")
+    util.install("opencv-contrib-python")
     import cv2
 
 settings = util.getSettings()
@@ -46,9 +46,6 @@ frame = None
 flaskThread = None
 displayString = None
 timeString = None
-
-def install(name):
-    pip.main(['install', name])
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
