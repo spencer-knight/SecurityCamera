@@ -1,15 +1,29 @@
-import cv2
 import threading
 import notifacation
 import util
 import datetime
 import json
-from flask import Flask, render_template, render_template_string, Response
 import time
 import os
-import psutil
+import pip._internal as pip
 
+try:
+    from flask import Flask, render_template, render_template_string, Response
+except:
+    install("flask")
+    from flask import Flask, render_template, render_template_string, Response
 
+try:
+    import psutil
+except:    
+    install("psutil")
+    import psutil
+
+try:
+    import cv2
+except:
+    install("opencv-contrib-python")
+    import cv2
 
 settings = util.getSettings()
 startDelay = settings["startDelay"]
@@ -29,6 +43,9 @@ frame = None
 flaskThread = None
 displayString = None
 timeString = None
+
+def install(name):
+    pip.main(['install', name])
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
