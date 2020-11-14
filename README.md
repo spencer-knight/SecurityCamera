@@ -5,5 +5,6 @@ Yes, it is very hacked together.
 ## Instructions
 You need to install python<br />
 [python](https://www.python.org/downloads/) <br />
-then type "python3 main.py" <br />
-you might need to edit some permissions to allow the program to have access to the camera and other stuff
+download files and unzip them
+On windows click run.bat
+if you are on linux you can probably figure it out
