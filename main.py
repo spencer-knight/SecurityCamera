@@ -5,9 +5,10 @@ import time
 import os
 import pip._internal as pip
 
+import init
+init.run()
 import notifacation
 import util
-import init
 
 try:
     from flask import Flask, render_template, render_template_string, Response
@@ -270,7 +271,6 @@ def gen_frames_motion():
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
         time.sleep(settings["loopDelay"])
 
-init.run()
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
