@@ -3,7 +3,6 @@ import datetime
 import json
 import time
 import os
-import pip._internal as pip
 
 import init
 init.run()
