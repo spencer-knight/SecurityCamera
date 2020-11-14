@@ -201,7 +201,7 @@ def return_videos():
     </video>
     <br>
     """
-    for filename in reversed(os.listdir("./Recordings/")):
+    for filename in reversed(os.listdir(settings["videoOut"])):
         if filename.endswith(".mp4") or filename.endswith(".webm"):
             ret = ret + video_str.format(filename = filename, lbrace = "{", rbrace="}", vanity = filename.replace(".webm", ""))
 
