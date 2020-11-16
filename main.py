@@ -115,6 +115,14 @@ def motionDetected():
 def get_performance():
     return "cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent)
 
+def grabFrames():
+    global frame
+
+    while True:
+        ret, lFrame = cap.read()
+        if ret:
+            frame = lFrame
+
 def main():
     global frame
     global motionFrame
@@ -126,8 +134,7 @@ def main():
         displayString = get_performance()
         if active:
             displayString += " active" 
-        
-        ret, frame = cap.read()
+        #ret, frame = cap.read()
         #frame = cv2.resize( frame, (640,480))
         motionFrame = getMotion( frame)
         motionDetectedBool = percentWhite( frame, motionFrame) > 4.0
@@ -267,9 +274,13 @@ def gen_frames_motion():
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
         time.sleep(settings["loopDelay"])
 
+cameraThread = threading.Thread(target = grabFrames)
+cameraThread.start()
+ret, frame = cap.read()
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
     flaskThread = threading.Thread(target = startApp)
     flaskThread.start()
+
 main()
