@@ -75,7 +75,7 @@ def getMotion( frame):
     frame = backSub.apply(frame)
     return frame
 
-def percentWhite( frame, motionFrame):
+def percentWhite( motionFrame):
     numWhite = motionFrame[motionFrame > 10].size
     totalPix = motionFrame.size
     percentWhite = round( 10000 * numWhite / totalPix) / 100    
@@ -98,14 +98,14 @@ def motionDetected():
         #alertGroup needs to be threaded so that it doesn't stop the camera
         notifacationThread = threading.Thread( target = notifacation.alertGroup, args = (settings["alertMessage"], ))
         notifacationThread.start()
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime(settings["fileNameFormat"])
+        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#
         active = True
         resetTimer()
         setTimer()
         timer.start()
-        timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime(settings["fileNameFormat"])
         #might add check to see if file already exists, then add something so that stuff doesn't get overwritten
-        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#
     else: 
         if active and armed:
             resetTimer()
@@ -123,6 +123,18 @@ def grabFrames():
         if ret:
             frame = lFrame
 
+def determineMotion():
+    global frame
+    global motionFrame
+
+    while True:
+        motionFrame = getMotion( frame)
+        motionDetectedBool = percentWhite( motionFrame) > 4.0
+        
+        if motionDetectedBool:
+            motionDetected()
+            motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
+
 def main():
     global frame
     global motionFrame
@@ -136,12 +148,12 @@ def main():
             displayString += " active" 
         #ret, frame = cap.read()
         #frame = cv2.resize( frame, (640,480))
-        motionFrame = getMotion( frame)
-        motionDetectedBool = percentWhite( frame, motionFrame) > 4.0
+        #motionFrame = getMotion( frame)
+        #motionDetectedBool = percentWhite( motionFrame) > 4.0
     
-        if motionDetectedBool:
-            motionDetected()
-            motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
+        #if motionDetectedBool:
+        #    motionDetected()
+        #    motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
 
 
         timeInfo = datetime.datetime.now()
@@ -277,6 +289,10 @@ def gen_frames_motion():
 cameraThread = threading.Thread(target = grabFrames)
 cameraThread.start()
 ret, frame = cap.read()
+
+motionThread = threading.Thread(target = determineMotion)
+motionThread.start()
+
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
