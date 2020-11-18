@@ -301,6 +301,8 @@ cameraThread = threading.Thread(target = grabFrames)
 cameraThread.start()
 ret, frame = cap.read()
 
+time.sleep(1)
+
 motionThread = threading.Thread(target = determineMotion)
 motionThread.start()
 
