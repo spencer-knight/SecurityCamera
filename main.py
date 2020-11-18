@@ -145,6 +145,8 @@ def determineMotion():
         if motionDetectedBool:
             motionDetected()
             motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
+        time.sleep(settings["loopDelay"])
+    
 
 def main():
     global frame
@@ -222,6 +224,7 @@ def return_videos():
     <!DOCTYPE html>
     <html>
     <body>
+    <a href=\"/\">Home</a>
     """
 
     video_str = """
@@ -301,7 +304,8 @@ cameraThread = threading.Thread(target = grabFrames)
 cameraThread.start()
 ret, frame = cap.read()
 
-time.sleep(1)
+while not ret:
+    ret, frame = cap.read()
 
 motionThread = threading.Thread(target = determineMotion)
 motionThread.start()
