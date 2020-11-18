@@ -14,26 +14,27 @@ def run():
         \"websiteOn\": true
     }""")
     settingsList = [
-        "emailAddress",
-        "alertEnabled",
-        "videoOut",
-        "fileNameFormat",
-        "showImages",
-        "alertMessage",
-        "websiteOn",
-        "clearCommand"
+        "emailAddress", #email to send alerts from
+        "alertEnabled", #whether or not to send alerts
+        "videoOut", #location of the video files recorded example: ../Recordings/
+        "fileNameFormat", #date format for filename https://www.tutorialkart.com/python/python-datetime/python-datetime-format/
+        "showImages", #whether or not to show the images
+        "alertMessage", #message sent in alert email
+        "websiteOn", #whether or not to run the website
+        "clearCommand", #not used anymore but os specific clear cmd
+        "timeZone" #IANA timezone
     ]
     settingsPasswordList = [
-        "emailPassword"
+        "emailPassword" #sender email passowrd
     ]
     settingsNumberList = [
-        "recordingTime",
-        "startDelay",
-        "outfileFramerate",
-        "loopDelay"
+        "recordingTime", #how long after motion is detected that the frames will keep getting written to a file
+        "startDelay", #how long after starting to arm
+        "outfileFramerate", #framerate of out files
+        "loopDelay" #delay in program looops
     ]
     settingsListList = [
-        "alertGroup"
+        "alertGroup" #list of emails to send alert to, /stop to stop prompting
     ]
     #need to implement way of making this list get taken as input
 

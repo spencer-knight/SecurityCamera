@@ -16,6 +16,12 @@ except:
     from flask import Flask, render_template, render_template_string, Response
 
 try:
+    from dateutil import tz
+except:
+    util.install("python-dateutil")
+    from dateutil import tz
+
+try:
     import psutil
 except:    
     util.install("psutil")
@@ -31,6 +37,7 @@ settings = util.getSettings()
 startDelay = settings["startDelay"]
 recordingTime = settings["recordingTime"]
 showImages = settings["showImages"]
+timezone = tz.gettz(settings["timeZone"])
 
 cap = cv2.VideoCapture(0)
 backSub = cv2.createBackgroundSubtractorKNN()
@@ -118,6 +125,8 @@ def get_performance():
 def grabFrames():
     global frame
 
+    print("Frame grabber thread started")
+
     while True:
         ret, lFrame = cap.read()
         if ret:
@@ -126,6 +135,8 @@ def grabFrames():
 def determineMotion():
     global frame
     global motionFrame
+
+    print("Algorithm thread started")
 
     while True:
         motionFrame = getMotion( frame)
@@ -156,13 +167,13 @@ def main():
         #    motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
 
 
-        timeInfo = datetime.datetime.now()
+        timeInfo = datetime.datetime.now(tz=timezone)
         timeString = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         recName = timeString
         outFrame = frame
         timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
         displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
         outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
@@ -244,12 +255,12 @@ def gen_frames():
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        timeInfo = datetime.datetime.now()
+        timeInfo = datetime.datetime.now(tz=timezone)
         recName = timeString
         outFrame = frame
         timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
         displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
         outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
