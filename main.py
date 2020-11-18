@@ -16,6 +16,12 @@ except:
     from flask import Flask, render_template, render_template_string, Response
 
 try:
+    from dateutil import tz
+except:
+    util.install("python-dateutil")
+    from dateutil import tz
+
+try:
     import psutil
 except:    
     util.install("psutil")
@@ -31,6 +37,7 @@ settings = util.getSettings()
 startDelay = settings["startDelay"]
 recordingTime = settings["recordingTime"]
 showImages = settings["showImages"]
+timezone = tz.gettz(settings["timeZone"])
 
 cap = cv2.VideoCapture(0)
 backSub = cv2.createBackgroundSubtractorKNN()
@@ -75,7 +82,7 @@ def getMotion( frame):
     frame = backSub.apply(frame)
     return frame
 
-def percentWhite( frame, motionFrame):
+def percentWhite( motionFrame):
     numWhite = motionFrame[motionFrame > 10].size
     totalPix = motionFrame.size
     percentWhite = round( 10000 * numWhite / totalPix) / 100    
@@ -98,14 +105,14 @@ def motionDetected():
         #alertGroup needs to be threaded so that it doesn't stop the camera
         notifacationThread = threading.Thread( target = notifacation.alertGroup, args = (settings["alertMessage"], ))
         notifacationThread.start()
+        timeInfo = datetime.datetime.now()
+        recName = timeInfo.strftime(settings["fileNameFormat"])
+        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#
         active = True
         resetTimer()
         setTimer()
         timer.start()
-        timeInfo = datetime.datetime.now()
-        recName = timeInfo.strftime(settings["fileNameFormat"])
         #might add check to see if file already exists, then add something so that stuff doesn't get overwritten
-        out = cv2.VideoWriter(settings["videoOut"] + recName + ".webm",cv2.VideoWriter_fourcc(*"VP80"), settings["outfileFramerate"], (640,480))#
     else: 
         if active and armed:
             resetTimer()
@@ -114,6 +121,32 @@ def motionDetected():
 
 def get_performance():
     return "cpu: " + str(psutil.cpu_percent()) + " ram: " + str(psutil.virtual_memory().percent)
+
+def grabFrames():
+    global frame
+
+    print("Frame grabber thread started")
+
+    while True:
+        ret, lFrame = cap.read()
+        if ret:
+            frame = lFrame
+
+def determineMotion():
+    global frame
+    global motionFrame
+
+    print("Algorithm thread started")
+
+    while True:
+        motionFrame = getMotion( frame)
+        motionDetectedBool = percentWhite( motionFrame) > 4.0
+        
+        if motionDetectedBool:
+            motionDetected()
+            motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
+        time.sleep(settings["loopDelay"])
+    
 
 def main():
     global frame
@@ -126,24 +159,23 @@ def main():
         displayString = get_performance()
         if active:
             displayString += " active" 
-        
-        ret, frame = cap.read()
+        #ret, frame = cap.read()
         #frame = cv2.resize( frame, (640,480))
-        motionFrame = getMotion( frame)
-        motionDetectedBool = percentWhite( frame, motionFrame) > 4.0
+        #motionFrame = getMotion( frame)
+        #motionDetectedBool = percentWhite( motionFrame) > 4.0
     
-        if motionDetectedBool:
-            motionDetected()
-            motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
+        #if motionDetectedBool:
+        #    motionDetected()
+        #    motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
 
 
-        timeInfo = datetime.datetime.now()
+        timeInfo = datetime.datetime.now(tz=timezone)
         timeString = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         recName = timeString
         outFrame = frame
         timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
         displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
         outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
@@ -192,6 +224,7 @@ def return_videos():
     <!DOCTYPE html>
     <html>
     <body>
+    <a href=\"/\">Home</a>
     """
 
     video_str = """
@@ -225,12 +258,12 @@ def gen_frames():
         #recName = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
         #outFrame = cv2.putText( frame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
 
-        timeInfo = datetime.datetime.now()
+        timeInfo = datetime.datetime.now(tz=timezone)
         recName = timeString
         outFrame = frame
         timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
         displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0] - 7, 470), (30,30,30), 10)
+        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
         outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
         outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
@@ -267,9 +300,20 @@ def gen_frames_motion():
                 b'Content-Type: image/jpeg\r\n\r\n' + out + b'\r\n')  # concat frame one by one and show result
         time.sleep(settings["loopDelay"])
 
+cameraThread = threading.Thread(target = grabFrames)
+cameraThread.start()
+ret, frame = cap.read()
+
+while not ret:
+    ret, frame = cap.read()
+
+motionThread = threading.Thread(target = determineMotion)
+motionThread.start()
+
 setStartDelayTimer()
 startDelayTimer.start()
 if settings["websiteOn"]:
     flaskThread = threading.Thread(target = startApp)
     flaskThread.start()
+
 main()
