@@ -22,7 +22,9 @@ def run():
         "alertMessage", #message sent in alert email
         "websiteOn", #whether or not to run the website
         "clearCommand", #not used anymore but os specific clear cmd
-        "timeZone" #IANA timezone
+        "timeZone", #IANA timezone
+        "websiteOffset", #all website pages will be based on this directory so that no rando can easily look at your camera.
+        "websitePassword"
     ]
     settingsPasswordList = [
         "emailPassword" #sender email passowrd

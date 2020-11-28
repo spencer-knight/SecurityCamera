@@ -8,12 +8,12 @@ import init
 init.run()
 import notifacation
 import util
-
+    
 try:
-    from flask import Flask, render_template, render_template_string, Response, redirect, url_for
+    from flask import Flask, render_template, render_template_string, Response, redirect, url_for, request
 except:
     util.install("flask")
-    from flask import Flask, render_template, render_template_string, Response, redirect, url_for
+    from flask import Flask, render_template, render_template_string, Response, redirect, url_for, request
 
 try:
     from dateutil import tz
@@ -52,6 +52,7 @@ frame = None
 flaskThread = None
 displayString = None
 timeString = None
+websiteOffset = settings["websiteOffset"]
 
 # Run once the recording timer stops, this means it is the end of the recording period.
 def onTimer():
@@ -203,29 +204,32 @@ def main():
         time.sleep(settings["loopDelay"])
 
 app=Flask(__name__,static_folder=settings["videoOut"][:-1])
-
 @app.route('/')
+def loginPage():
+    return render_template('login.html')
+
+@app.route(websiteOffset)
 def home():
     global armed
     return render_template('index.html', arm_val = armed)
 
-@app.route('/video_feed')
+@app.route(websiteOffset + '/video_feed')
 def video_feed():
     return Response(gen_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/motion_view')
+@app.route(websiteOffset + '/motion_view')
 def motion_view():
     return Response(gen_frames_motion(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/video_records')
+@app.route(websiteOffset + '/video_records')
 def return_videos():
     ret = """
     <!DOCTYPE html>
     <html>
     <body>
-    <a href=\"/\">Home</a>
+    <a href=\"./\">Home</a>
     """
 
     video_str = """
@@ -245,7 +249,7 @@ def return_videos():
     """
     return render_template_string(ret)
 
-@app.route("/arm", methods=["get", "POST"])
+@app.route(websiteOffset + "/arm", methods=["POST"])
 def onArmButton():
     global armed
     #print("It should arm or unarm now")
@@ -255,10 +259,18 @@ def onArmButton():
     else:
         print("Disarmed")
 
-    return redirect("/")
+    return redirect(websiteOffset)
+
+@app.route("/login", methods=["POST"])
+def checkPassword():
+    if request.form['password'] == settings["websitePassword"]:
+        return redirect(websiteOffset)
+    else:
+        return "Wrong"
+
 
 def startApp():
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', ssl_context='adhoc')
 
 def gen_frames():
     global frame
