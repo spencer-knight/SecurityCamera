@@ -10,10 +10,10 @@ import notifacation
 import util
 
 try:
-    from flask import Flask, render_template, render_template_string, Response
+    from flask import Flask, render_template, render_template_string, Response, redirect, url_for
 except:
     util.install("flask")
-    from flask import Flask, render_template, render_template_string, Response
+    from flask import Flask, render_template, render_template_string, Response, redirect, url_for
 
 try:
     from dateutil import tz
@@ -206,7 +206,8 @@ app=Flask(__name__,static_folder=settings["videoOut"][:-1])
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    global armed
+    return render_template('index.html', arm_val = armed)
 
 @app.route('/video_feed')
 def video_feed():
@@ -243,6 +244,18 @@ def return_videos():
     </body>
     """
     return render_template_string(ret)
+
+@app.route("/arm", methods=["get", "POST"])
+def onArmButton():
+    global armed
+    #print("It should arm or unarm now")
+    armed = not armed
+    if armed:
+        print("Armed")
+    else:
+        print("Disarmed")
+
+    return redirect("/")
 
 def startApp():
     app.run(host='0.0.0.0')
@@ -310,8 +323,8 @@ while not ret:
 motionThread = threading.Thread(target = determineMotion)
 motionThread.start()
 
-setStartDelayTimer()
-startDelayTimer.start()
+#setStartDelayTimer()
+#startDelayTimer.start()
 if settings["websiteOn"]:
     flaskThread = threading.Thread(target = startApp)
     flaskThread.start()

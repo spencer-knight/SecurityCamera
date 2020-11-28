@@ -27,8 +27,15 @@
     </div>
 </div>
 <br>
-
 <br>
 <br>
+<form method="post" action="/arm">
+    {% if arm_val is sameas true%}
+    <input type="submit" value="Disarm" style="background-color: #FF0000"/>
+    {%endif%}
+    {% if arm_val is sameas false%}
+    <input type="submit" value="Arm" style="background-color: #00FF00"/>
+    {%endif%}
+</form>
 </body>
 </html>
