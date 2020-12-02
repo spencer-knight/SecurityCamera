@@ -132,6 +132,7 @@ def grabFrames():
         ret, lFrame = cap.read()
         if ret:
             frame = lFrame
+        time.sleep(settings["loopDelay"])
 
 def determineMotion():
     global frame
