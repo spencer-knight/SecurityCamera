@@ -3,7 +3,7 @@ import datetime
 import json
 import time
 import os
-
+import numpy as np
 import init
 init.run()
 import notifacation
@@ -51,6 +51,7 @@ out = None
 frame = None
 flaskThread = None
 displayString = None
+motionFrame = None
 timeString = None
 websiteOffset = settings["websiteOffset"]
 
@@ -79,8 +80,15 @@ def setStartDelayTimer():
 
 def getMotion( frame):
     global backsub
+    #frame = cv2.fastNlMeansDenoisingColored(frame)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    cv2.bilateralFilter(frame, 7, 50, 50)
+    #frame = cv2.GaussianBlur(frame, (41,41), cv2.BORDER_DEFAULT)
+    frame = cv2.Canny( frame, 60, 240)
     frame = cv2.GaussianBlur(frame, (41,41), cv2.BORDER_DEFAULT)
     frame = backSub.apply(frame)
+    kernel = np.ones((60,60),np.uint8)
+    frame = cv2.morphologyEx(frame, cv2.MORPH_CLOSE, kernel)
     return frame
 
 def percentWhite( motionFrame):
@@ -171,17 +179,17 @@ def main():
         #    motionFrame = cv2.putText( motionFrame, "Motion Detected", (10,22), cv2.FONT_HERSHEY_SIMPLEX, .7, (100,100,100), 1)
 
 
-        timeInfo = datetime.datetime.now(tz=timezone)
-        timeString = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
-        recName = timeString
+        #timeInfo = datetime.datetime.now(tz=timezone)
+        #timeString = timeInfo.strftime("%a %d/%m/%Y %I:%M:%S %Z")
+        #recName = timeString
         outFrame = frame
-        timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
-        outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
-        outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-        outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
-        outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
-
+        #timeSize = cv2.getTextSize(recName, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        #displaySize = cv2.getTextSize(displayString, cv2.FONT_HERSHEY_SIMPLEX, .4, 1)
+        #outFrame = cv2.rectangle( outFrame, (10,470 - timeSize[0][1]), (10 + timeSize[0][0], 470), (30,30,30), 10)
+        #outFrame = cv2.putText( outFrame, recName, (10,470), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+        ##outFrame = cv2.rectangle( outFrame, (10,15 - displaySize[0][1]), (10 + displaySize[0][0], 15), (30,30,30), 10)
+#        outFrame = cv2.putText( outFrame, displayString, (10,15), cv2.FONT_HERSHEY_SIMPLEX, .4, (250,250,250), 1)
+#
         if showImages:
             cv2.imshow("Frame", outFrame)
             cv2.imshow("Motion", motionFrame)
@@ -329,9 +337,11 @@ def gen_frames_motion():
 cameraThread = threading.Thread(target = grabFrames)
 cameraThread.start()
 ret, frame = cap.read()
+motionFrame = getMotion(frame)
 
 while not ret:
     ret, frame = cap.read()
+    motionFrame = getMotion(frame)
 
 motionThread = threading.Thread(target = determineMotion)
 motionThread.start()
